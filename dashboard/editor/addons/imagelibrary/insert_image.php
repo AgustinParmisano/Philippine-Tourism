@@ -8,7 +8,7 @@
 require('config.inc.php');
 error_reporting(0);
 // get the identifier of the editor
-$wysiwyg = $_GET['wysiwyg']; 
+$wysiwyg = $_GET['wysiwyg'];
 // set image dir
 $leadon = $rootdir.$imagebasedir;
 
@@ -36,9 +36,10 @@ if($_GET['dir']) {
 	if($_GET['dir'] == $leadon) {
 		$dirok = false;
 	}
-	
+
 	if($dirok) {
-		$leadon = $_GET['dir'];
+		#$leadon = $_GET['dir']; # Old vulnerable code
+		$leadon = filter_var($_GET['dir'], FILTER_SANITIZE_STRING); #Sanitize all $_GET
 	}
 }
 
@@ -60,7 +61,7 @@ if($allowuploads && $_FILES['file']) {
 }
 
 if($allowuploads) {
-	$phpallowuploads = (bool) ini_get('file_uploads');		
+	$phpallowuploads = (bool) ini_get('file_uploads');
 	$phpmaxsize = ini_get('upload_max_filesize');
 	$phpmaxsize = trim($phpmaxsize);
 	$last = strtolower($phpmaxsize{strlen($phpmaxsize)-1});
@@ -90,7 +91,7 @@ if($allowuploads) {
 \* ---------------------------------------------------------------------- */
 function insertImage() {
 	var n = WYSIWYG_Popup.getParam('wysiwyg');
-	
+
 	// get values from form fields
 	var src = document.getElementById('src').value;
 	var alt = document.getElementById('alt').value;
@@ -100,7 +101,7 @@ function insertImage() {
 	var align = document.getElementById('align').value
 	var vspace = document.getElementById('vspace').value
 	var hspace = document.getElementById('hspace').value
-	
+
 	// insert image
 	WYSIWYG.insertImage(src, width, height, align, border, alt, hspace, vspace, n);
   	window.close();
@@ -112,17 +113,17 @@ function insertImage() {
 \* ---------------------------------------------------------------------- */
 function loadImage() {
 	var n = WYSIWYG_Popup.getParam('wysiwyg');
-	
+
 	// get selection and range
 	var sel = WYSIWYG.getSelection(n);
 	var range = WYSIWYG.getRange(sel);
-	
+
 	// the current tag of range
 	var img = WYSIWYG.findParent("img", range);
-	
+
 	// if no image is defined then return
 	if(img == null) return;
-		
+
 	// assign the values to the form elements
 	for(var i = 0;i < img.attributes.length;i++) {
 		var attr = img.attributes[i].name.toLowerCase();
@@ -130,7 +131,7 @@ function loadImage() {
 		//alert(attr + " = " + value);
 		if(attr && value && value != "null") {
 			switch(attr) {
-				case "src": 
+				case "src":
 					// strip off urls on IE
 					if(WYSIWYG_Core.isMSIE) value = WYSIWYG.stripURLPath(n, value, false);
 					document.getElementById('src').value = value;
@@ -155,11 +156,11 @@ function loadImage() {
 				break;
 				case "height":
 					document.getElementById('height').value = value;
-				break;				
+				break;
 			}
 		}
 	}
-	
+
 	// get width and height from style attribute in none IE browsers
 	if(!WYSIWYG_Core.isMSIE && document.getElementById('width').value == "" && document.getElementById('width').value == "") {
 		document.getElementById('width').value = img.style.width.replace(/px/, "");
@@ -194,7 +195,7 @@ function selectItemByValue(element, value) {
 	<?php
 	if($allowuploads) {
 		if($phpallowuploads) {
-		
+
 	?>
 		<tr>
 			<td style="padding-top: 0px;padding-bottom: 0px; font-family: arial, verdana, helvetica; font-size: 11px;width:80px;">Upload:</td>
@@ -226,7 +227,7 @@ function selectItemByValue(element, value) {
 		<td style="padding-bottom: 2px; padding-top: 0px;"><input type="text" name="alt" id="alt" value=""  style="font-size: 10px; width: 100%;"></td>
 	</tr>
 </table>
-	
+
 <table width="380" border="0" cellpadding="0" cellspacing="0"><tr><td style="vertical-align:top;">
 <span style="font-family: arial, verdana, helvetica; font-size: 11px; font-weight: bold;">Layout:</span>
 <table width="180" border="0" cellpadding="0" cellspacing="0" style="background-color: #F7F7F7; border: 2px solid #FFFFFF; padding: 5px;">
@@ -242,7 +243,7 @@ function selectItemByValue(element, value) {
   <td style="padding-bottom: 2px; padding-top: 0px; font-family: arial, verdana, helvetica; font-size: 11px;">Border:</td>
 	<td style="padding-bottom: 2px; padding-top: 0px;"><input type="text" name="border" id="border" value="0"  style="font-size: 10px; width: 100%;"></td>
  </tr>
-</table>	
+</table>
 
 </td>
 <td width="10">&nbsp;</td>
@@ -275,7 +276,7 @@ function selectItemByValue(element, value) {
   <td style="padding-bottom: 2px; padding-top: 0px; font-family: arial, verdana, helvetica; font-size: 11px;">Vertical Space:</td>
 	<td style="padding-bottom: 2px; padding-top: 0px;"><input type="text" name="vspace" id="vspace" value=""  style="font-size: 10px; width: 100%;"></td>
  </tr>
-</table>	
+</table>
 
 </td>
 </tr>
@@ -289,10 +290,10 @@ function selectItemByValue(element, value) {
 <tr>
 	<td colspan="2" align="right" style="padding-top: 5px;">
 		<input type="submit" value="  Submit  " onclick="insertImage();return false;" style="font-size: 12px;">
-		<?php if ( $allowuploads ) { ?> 
+		<?php if ( $allowuploads ) { ?>
 			<input type="submit" value="  Upload  " style="font-size: 12px;">
-		<?php } ?> 		
-		<input type="button" value="  Cancel  " onclick="window.close();" style="font-size: 12px;">	
+		<?php } ?>
+		<input type="button" value="  Cancel  " onclick="window.close();" style="font-size: 12px;">
 	</td>
 </tr>
 </form>
